@@ -1,10 +1,25 @@
 .MuiList-root{
-  border: 1px solid #e0e0e0;
   padding: 0 !important;
 }
 .MuiListItem-root.MuiListItem-gutters {
   border-bottom: 1px solid #e0e0e0;
   &:last-child {
       border-bottom: none;
+  }
+}
+.MuiButton-containedPrimary{
+  background: linear-gradient(#62b1ff,#1976d2);
+}
+.MuiCardHeader {
+  &-title{
+      font-size: 20px !important;
+  }
+  &-root {
+      background: linear-gradient(#62b1ff,#1976d2);
+      color: white;
+  }
+  &-subheader {
+      color: white !important;
+      font-size: 13px !important;
   }
 }

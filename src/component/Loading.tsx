@@ -3,7 +3,7 @@ export const Loading = () => {
   return (
     <Box sx={{
       width: '100%',
-      height: '300px',
+      height: '100px',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center'

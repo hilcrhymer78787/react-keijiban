@@ -17,7 +17,7 @@ export const New = () => {
   }
   return (
     <Container>
-      <Typography color="primary" variant="h4" sx={{mb:'20px'}}>新規作成</Typography>
+      <Typography color="primary" variant="h4" sx={{mb:'20px'}}>スレッド新規作成画面</Typography>
       <TextField
         sx={{ mr: '10px' }}
         size='small'
@@ -25,7 +25,7 @@ export const New = () => {
         onChange={(e) => { setTitle(e.currentTarget.value); }}
         variant="outlined" color="primary"
       />
-      <Button onClick={createThread} variant="contained">ボタン</Button>
+      <Button onClick={createThread} variant="contained">新規作成</Button>
       {/* <pre>{JSON.stringify(title, null, 2)}</pre> */}
     </Container>
   );
