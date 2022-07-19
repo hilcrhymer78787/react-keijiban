@@ -59,8 +59,8 @@ function Index() {
       <Card>
         <CardHeader title="スレッド一覧" />
         <List sx={{ width: '100%' }}>
-          {threads.map((thread, index) => (
-            <ListItem key={index} onClick={() => {
+          {threads.map((thread) => (
+            <ListItem key={thread.id} sx={{ cursor: 'pointer' }} onClick={() => {
               navigate(`/thread/${thread.id}`)
             }}>
               <ListItemAvatar>
