@@ -1,57 +1,12 @@
-import React from "react";
-import { api } from "../plugins/axios";
-import { Box, Button, CardHeader, Card, List, ListItem, ListItemAvatar, ListItemText, Avatar, Container, Typography } from '@mui/material';
+import { Box, CardHeader, Card, List, ListItem, ListItemAvatar, ListItemText, Avatar, Container, Typography } from '@mui/material';
 import { LoadingButton } from "@mui/lab";
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import Loading from './../component/Loading'
-import { AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 import { useNavigate } from 'react-router-dom';
-
-export type apiThreadsReq = {
-  offset: number;
-}
-export type apiThreadsRes = threadType[];
-export type threadType = {
-  id: string;
-  title: string;
-}
-
-export const getThreads = async (offset: number) => {
-  const apiParam: apiThreadsReq = {
-    offset: offset
-  };
-  const requestConfig: AxiosRequestConfig = {
-    url: "/threads",
-    method: "GET",
-    params: apiParam
-  };
-  return api(requestConfig)
-    .then((res: AxiosResponse<apiThreadsRes>) => res.data)
-    .catch((err: AxiosError) => [])
-}
-const useThreads = () => {
-  const [threads, setThreads] = React.useState<apiThreadsRes>([]);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const fetchThreads = async () => {
-    setIsLoading(true);
-    const res = await getThreads(threads.length);
-    setIsLoading(false);
-    setThreads((prevState) => {
-      return [...prevState, ...res]
-    });
-  }
-  React.useEffect(() => {
-    fetchThreads()
-  }, []);
-  return {
-    threads,
-    isLoading,
-    fetchThreads,
-  }
-}
+import { useThreads } from '../data/threads'
 
 function Index() {
-  const { threads, isLoading, fetchThreads } = useThreads();
+  const { threads, isLoading, fetchThreads, errorText } = useThreads();
   const navigate = useNavigate();
   return (
     <Container>
@@ -72,10 +27,15 @@ function Index() {
             </ListItem>
           ))}
         </List>
-        {!Boolean(threads.length) && isLoading && (
+        {!threads.length && isLoading && (
           <Loading />
         )}
       </Card>
+      {!!errorText && (
+        <Box sx={{ mt: '20px', textAlign: 'center' }}>
+          <Typography color="red" variant="h6" sx={{ mb: '20px' }}>{errorText}</Typography>
+        </Box>
+      )}
       <Box sx={{ mt: '20px', textAlign: 'center' }}>
         <LoadingButton
           onClick={fetchThreads}

@@ -1,98 +1,32 @@
 import React from "react";
-import { api } from "../../plugins/axios";
 import { LoadingButton } from "@mui/lab";
-import { CircularProgress, TextField, CardHeader, Card, Box, List, ListItem, ListItemAvatar, ListItemText, Avatar, Container, Typography } from '@mui/material';
-import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+import { TextField, CardHeader, Card, Box, List, ListItem, ListItemAvatar, ListItemText, Avatar, Container, Typography } from '@mui/material';
 import Loading from './../../component/Loading'
-import { AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
-import { BrowserRouter, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import MessageIcon from '@mui/icons-material/Message';
+import { usePostData } from '../../data/posts'
 
-export type apiGetPostDataReq = {
-  offset: number;
-}
-export type apiGetPostDataRes = {
-  threadId: number,
-  title: string,
-  posts: Post[]
-}
-export type Post = {
-  id: number,
-  post: string
-}
-
-export const apiCreatePostData = async (threadId: string, newPost: string) => {
-  const requestConfig = {
-    url: `/threads/${threadId}/posts`,
-    method: "POST",
-    data: {
-      post: newPost
-    }
-  };
-  return api(requestConfig)
-}
-
-export const getPostData = async (threadId: string, offset: number) => {
-  const apiParam: apiGetPostDataReq = {
-    offset: offset
-  };
-  const requestConfig: AxiosRequestConfig = {
-    url: `/threads/${threadId}/posts`,
-    method: "GET",
-    params: apiParam
-  };
-  return api(requestConfig)
-    .then((res: AxiosResponse<apiGetPostDataRes>) => res.data)
-}
-const usePostData = () => {
-  const params = useParams()
-  const [postData, setPostData] = React.useState<apiGetPostDataRes>({
-    threadId: 0,
-    title: '',
-    posts: []
-  });
-  const [fetchLoading, setFetchLoading] = React.useState(true);
-  const [createLoading, setCreateLoading] = React.useState(false);
-  const fetchPostData = async () => {
-    setFetchLoading(true);
-    const res = await getPostData(params.thread_id ?? '', postData.posts.length);
-    setFetchLoading(false);
-    setPostData((prevState) => {
-      return {
-        threadId: res.threadId,
-        title: res.title,
-        posts: [...prevState.posts, ...res.posts]
-      }
-    });
-  }
-  const createPostData = async (newPost: string) => {
-    if (!newPost) return '文字を入力してください';
-    setCreateLoading(true);
-    await apiCreatePostData(params.thread_id ?? '', newPost);
-    fetchPostData()
-    setCreateLoading(false);
-    return '';
-  }
-  React.useEffect(() => {
-    fetchPostData()
-  }, []);
-  return {
-    postData,
-    fetchLoading,
-    fetchPostData,
-    createLoading,
-    createPostData,
-  }
-}
 
 function Detail() {
-  const { postData, fetchLoading, fetchPostData, createLoading, createPostData, } = usePostData();
+  const params = useParams()
+  const { postData, fetchLoading, fetchPostData, createLoading, createPostData, getErrorText } = usePostData();
   const [newPost, setNewPost] = React.useState('');
-  const [errorText, setErrorText] = React.useState('');
+  const [postErrorText, setPostErrorText] = React.useState('');
+
   const onClickSubmit = async () => {
-    const error = await createPostData(newPost)
-    setErrorText(error)
-    if (!error) setNewPost('');
+    try {
+      await createPostData(newPost)
+      setPostErrorText('');
+      setNewPost('');
+
+    } catch (e) {
+      if (e instanceof Error) {
+        setPostErrorText(e.message);
+      } else {
+        setPostErrorText('予期せぬエラー');
+      }
+
+    }
   }
   if (fetchLoading && !postData) return <Loading />;
   return (
@@ -103,10 +37,9 @@ function Detail() {
           sx={{ mr: '10px' }}
           size='small'
           value={newPost}
-          helperText={errorText}
-          error={Boolean(errorText)}
+          helperText={postErrorText}
+          error={!!postErrorText}
           onChange={(e) => {
-            setErrorText('')
             setNewPost(e.currentTarget.value);
           }}
           onKeyDown={async (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -126,17 +59,17 @@ function Detail() {
       <Card>
         <CardHeader
           title={postData?.title}
-          subheader={`ID：${postData?.threadId}`}
+          subheader={`ID：${params?.thread_id}`}
         />
-        {!Boolean(postData?.posts.length) && fetchLoading && (
+        {!postData?.posts.length && fetchLoading && (
           <Loading />
         )}
-        {!Boolean(postData?.posts.length) && !fetchLoading && (
+        {!postData?.posts.length && !fetchLoading && (
           <Box sx={{ textAlign: 'center', p: '30px' }}>
             <Typography variant="h6">まだメッセージはありません</Typography>
           </Box>
         )}
-        {Boolean(postData?.posts.length) && (
+        {!!postData?.posts.length && (
           <List sx={{ width: '100%' }}>
             {postData?.posts.map((post) => (
               <ListItem key={post.id}>
@@ -151,6 +84,11 @@ function Detail() {
           </List>
         )}
       </Card>
+      {!!getErrorText && (
+        <Box sx={{ mt: '20px', textAlign: 'center' }}>
+          <Typography color="red" variant="h6" sx={{ mb: '20px' }}>{getErrorText}</Typography>
+        </Box>
+      )}
       <Box sx={{ mt: '20px', textAlign: 'center' }}>
         <LoadingButton
           onClick={fetchPostData}
