@@ -23,12 +23,6 @@ export const apiCreatePostData = async (threadId: string, newPost: string) => {
     },
   };
   return api(requestConfig)
-    .then(() => {
-      return;
-    })
-    .catch((err: AxiosError) => {
-      throw err;
-    });
 };
 
 export const getPostData = async (threadId: string, offset: number) => {

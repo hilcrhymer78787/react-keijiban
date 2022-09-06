@@ -20,12 +20,6 @@ const getThreads = async (offset: number) => {
     params: apiParam,
   };
   return api(requestConfig)
-    .then((res: AxiosResponse<apiThreadsRes>) => {
-      return res.data;
-    })
-    .catch((err: AxiosError) => {
-      throw new Error(err.message);
-    });
 };
 export const useThreads = () => {
   const [threads, setThreads] = React.useState<apiThreadsRes>([]);
@@ -35,7 +29,7 @@ export const useThreads = () => {
     setIsLoading(true);
     try {
       const res = await getThreads(threads.length);
-      setThreads((prevState) => [...prevState, ...res]);
+      setThreads((prevState) => [...prevState, ...res.data]);
       setErrorText('');
     } catch (e) {
       if (e instanceof Error) {
